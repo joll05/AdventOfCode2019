@@ -11,9 +11,9 @@ wires[1] = wires[1].split(",")
 
 max = int(input("Max: "))
 
-crossedPositions = np.zeros((max, max), dtype=bool)
+crossedPositions = np.zeros((max, max), dtype=int)
 
-closestCrossing = [999999, 999999]
+shortestDistance = 999999
 
 posX = 0
 posY = 0
@@ -23,10 +23,13 @@ for wire in wires:
     posX = 0
     posY = 0
 
+    totalSteps = 0
     for i in wire:
         direction = i[0]
 
         for step in range(int(i[1:])):
+            totalSteps += 1
+
             if(direction == "R"):
                 posX += 1
             elif(direction == "L"):
@@ -39,12 +42,12 @@ for wire in wires:
                 print("Something went wrong.")
 
             if(checkingMode):
-                if(crossedPositions[posX, posY] == True):
-                    if(manhattan(closestCrossing[0], closestCrossing[1]) > manhattan(posX, posY)):
-                        closestCrossing = [posX, posY]
-            else:
-                crossedPositions[posX, posY] = True
+                if(crossedPositions[posX, posY] != 0):
+                    if(crossedPositions[posX, posY] + totalSteps < shortestDistance):
+                        shortestDistance = crossedPositions[posX, posY] + totalSteps
+            elif(crossedPositions[posX, posY] == 0):
+                crossedPositions[posX, posY] = totalSteps
 
     checkingMode = True
 
-print(manhattan(closestCrossing[0], closestCrossing[1]))
+print(shortestDistance)
