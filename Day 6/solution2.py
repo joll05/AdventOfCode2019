@@ -6,20 +6,37 @@ YOUpath = []
 SANpath = []
 
 def FindOrbiters(name, previousPath):
-    global totalOrbitCount
-    
-    totalOrbitCount += orbitCount
     checkPos = 0
+    if(name == "YOU"):
+        global YOUpath
+        YOUpath = previousPath
+    elif(name == "SAN"):
+        global SANpath
+        SANpath = previousPath
     while True:
         out = puzzleInput.find(name + ")", checkPos)
 
         if(out == -1):
             break
 
-        FindOrbiters(puzzleInput[out + 4:out + 7], orbitCount + 1)
+        FindOrbiters(puzzleInput[out + 4:out + 7], previousPath + [name])
         
         checkPos = out + 4
 
-FindOrbiters("COM", 0)
+FindOrbiters("COM", [])
 
-print(totalOrbitCount)
+def FindClosestCommonPoint():
+    global YOUpath
+    global SANpath
+    
+    indexi = 0
+    for i in reversed(YOUpath):
+        indexj = 0
+        for j in reversed(SANpath):
+            if(i == j):
+                print(indexi + indexj)
+                return
+            indexj += 1
+        indexi += 1
+
+FindClosestCommonPoint()
