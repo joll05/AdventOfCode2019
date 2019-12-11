@@ -3,38 +3,13 @@ import numpy as np
 def manhattan(point):
     return abs(point[0]) + abs(point[1])
 
-def divideVector(vec, denominator):
-    result = []
-    for v in vec:
-        result += [v / denominator]
-    return tuple(result)
-
-def multiplyVector(vec, product):
-    result = []
-    for v in vec:
-        result += [v * product]
-    return tuple(result)
-
-def vectorIsInteger(vec):
-    for v in vec:
-        if(not v.is_integer()):
-            return False
-    return True
-
-def vectorInt(vec):
-    result = []
-    for v in vec:
-        result += [int(v)]
-    return tuple(result)
-
 f = open("input.txt", "r")
 
 data = f.readlines()
 
 asteroids = []
 
-bestStation = None
-bestAsteroidCount = 0
+stationPos = (20, 19)
 
 for y in range(len(data)):
     line = data[y]
@@ -42,8 +17,6 @@ for y in range(len(data)):
         char = line[x]
         if(char == "#"):
             asteroids += [(x, y)]
-
-print("There are %d asteroids" % len(asteroids))
 
 for station in asteroids:
     asteroids_sorted = []
