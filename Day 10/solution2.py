@@ -1,7 +1,16 @@
 import numpy as np
+import math
 
 def manhattan(point):
     return abs(point[0]) + abs(point[1])
+
+def getAngle(point, sorting=True):
+    result = 0
+    result += (math.degrees(math.atan2(point[1], point[0])) + 180 - 90) % 360
+    if(sorting):
+        result += manhattan(point) / 100
+
+    return result
 
 f = open("input.txt", "r")
 
@@ -9,7 +18,7 @@ data = f.readlines()
 
 asteroids = []
 
-stationPos = (20, 19)
+station = (20, 19)
 
 for y in range(len(data)):
     line = data[y]
@@ -18,43 +27,38 @@ for y in range(len(data)):
         if(char == "#"):
             asteroids += [(x, y)]
 
-for station in asteroids:
-    asteroids_sorted = []
+asteroids_sorted = []
 
-    for i in asteroids:
-        asteroids_sorted += [(i[0] - station[0], i[1] - station[1])]
+for i in asteroids:
+    asteroids_sorted += [(i[0] - station[0], i[1] - station[1])]
 
-    asteroids_sorted.sort(key=manhattan)
-    asteroids_sorted.pop(0)
+asteroids_sorted.sort(key=getAngle)
+asteroids_sorted.pop(0)
 
-    hiddenTiles = np.full((100, 100), False, dtype=bool)
+laserAngle = 0
+currentAsteroid = 0
+destructionCount = 0
 
-    asteroidCount = 0
+while True:
+    asteroid = asteroids_sorted[currentAsteroid]
+    asteroidAngle = int(getAngle(asteroid, False))
+    if(asteroidAngle < laserAngle):
+        currentAsteroid += 1
+        currentAsteroid = currentAsteroid % len(asteroids_sorted)
 
-    for asteroid in asteroids_sorted:
-        if(hiddenTiles[asteroid] == True):
-            continue
+        if(int(getAngle(asteroids_sorted[currentAsteroid], False)) < asteroidAngle):
+            laserAngle += 1
+    elif(asteroidAngle == laserAngle):
+        destructionCount += 1
+        if(destructionCount == 200):
+            lastAsteroid = (asteroid[0] + station[0], asteroid[1] + station[1])
+            print("%s is no. 200. (%d * 100 + %d = %d)" % (lastAsteroid, lastAsteroid[0], lastAsteroid[1], lastAsteroid[0] * 100 + lastAsteroid[1]))
+            break
+        asteroids_sorted.pop(currentAsteroid)
+        laserAngle += 1
+    else:
+        laserAngle += 1
 
-        asteroidCount += 1
+    laserAngle = laserAngle % 360
 
-        direction = divideVector(asteroid, manhattan(asteroid))
-
-        i = 1
-        while True:
-            target = multiplyVector(direction, i)
-            
-            if(vectorIsInteger(target)):
-                hiddenTiles[vectorInt(target)] = True
-
-            if(manhattan(target) > 50):
-                break
-
-            i += 1
-
-    if(asteroidCount > bestAsteroidCount):
-        bestStation = station
-        bestAsteroidCount = asteroidCount
-
-    print("Station %s: %d asteroids visible." % (station, asteroidCount))
-
-print("Best: %s (%d asteroids)" % (bestStation, bestAsteroidCount))
+    print(laserAngle)
