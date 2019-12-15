@@ -1,3 +1,5 @@
+import time
+
 class Moon:
     position = [None, None, None]
     velocity = [None, None, None]
@@ -6,12 +8,12 @@ class Moon:
         self.position = list(position)
         self.velocity = [0] * len(position)
 
-    def ApplyGravity(self, moons):
-        for moon in moons:
-            for coord in range(len(moon.position)):
-                if(self.position[coord] < moon.position[coord]):
+    def ApplyGravity(self, ms):
+        for m in ms:
+            for coord in range(len(m.position)):
+                if(self.position[coord] < m.position[coord]):
                     self.velocity[coord] += 1
-                elif(self.position[coord] > moon.position[coord]):
+                elif(self.position[coord] > m.position[coord]):
                     self.velocity[coord] -= 1
 
     def ApplyVelocity(self):
@@ -33,29 +35,29 @@ f = open("input.txt")
 
 data = f.readlines()
 
-Moons = []
+def ProcessData():
+    out = []
+    for i in data:
+        coords = i[1:-2]
 
-for i in data:
-    coords = i[1:-2]
+        coords = coords.split(", ")
 
-    coords = coords.split(", ")
+        for coord in range(len(coords)):
+            coords[coord] = int(coords[coord][2:])
 
-    for coord in range(len(coords)):
-        coords[coord] = int(coords[coord][2:])
+        out += [Moon(coords)]
+    return out
 
-    Moons += [Moon(coords)]
+Moons = ProcessData()
 
-start = []
-
-for moon in Moons:
-    start += [moon.position]
+start = ProcessData()
 
 def StartCheck():
-    for moon in range(len(Moons)):
-        if(Moons[moon].velocity != [0, 0, 0]):
+    for m in range(len(start)):
+        if(Moons[m].velocity != [0, 0, 0]):
             return False
-
-        if(Moons[moon].position != start[moon]):
+        
+        if(Moons[m].position != start[m].position):
             return False
     
     return True
@@ -65,23 +67,21 @@ def TimeStep():
     global Moons
     global step
     
-    for moon in Moons:
-        moon.ApplyGravity(Moons)
+    for m in Moons:
+        m.ApplyGravity(Moons)
 
-    for moon in Moons:
-        moon.ApplyVelocity()
+    for m in Moons:
+        m.ApplyVelocity()
 
     step += 1
 
+    if(step % 50000 == 0):
+        print(step)
+
     if(StartCheck()):
         print("Found it at step %d" % step)
-        print("Current:")
-        for moon in Moons:
-            print("pos: %s, vel: %s" % (moon.position, moon.velocity))
-        print("Starting point:")
-        for moon in start:
-            print("pos: %s" % (moon))
-        exit()
+        while True:
+            time.sleep(1)
 
 while True:
     TimeStep()
