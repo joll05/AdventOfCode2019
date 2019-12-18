@@ -1,16 +1,27 @@
 import computer, pygame, sys
+import time, random
 pygame.init()
 
 size = width, height = (800, 800)
 
-spriteSpacing = 32
+offset = [700, 200]
 
-screen = pygame.display.set_mode(size, pygame.RESIZABLE)    
+spriteSpacing = 8
+
+screen = pygame.display.set_mode(size, pygame.RESIZABLE)
 
 def QuitCheck(eventType):
     if(eventType == pygame.QUIT):
         pygame.display.quit()
         sys.exit()
+
+def ScrollScreen(event):
+    if(event.key == pygame.K_RIGHT): offset[0] -= spriteSpacing
+    elif(event.key == pygame.K_LEFT): offset[0] += spriteSpacing
+    elif(event.key == pygame.K_DOWN): offset[1] -= spriteSpacing
+    elif(event.key == pygame.K_UP): offset[1] += spriteSpacing
+
+    Draw()
 
 position = [0, 0]
 direction = 1
@@ -20,16 +31,25 @@ def SendInput():
     while True:
         for event in pygame.event.get():
             QuitCheck(event.type)
+            
             if(event.type == pygame.KEYDOWN):
-                if(event.key == pygame.K_w): direction = 1
-                elif(event.key == pygame.K_s): direction = 2
-                elif(event.key == pygame.K_a): direction = 3
-                elif(event.key == pygame.K_d): direction = 4
+                if(event.key == pygame.K_s):
+                    direction = 1
+                    return 1
+                elif(event.key == pygame.K_w):
+                    direction = 2
+                    return 2
+                elif(event.key == pygame.K_d):
+                    direction = 3
+                    return 3
+                elif(event.key == pygame.K_a):
+                    direction = 4
+                    return 4
 
-                return direction
+                ScrollScreen(event)
 
 def GetTargetPosition():
-    currentPosition = position
+    currentPosition = position.copy()
     if(direction == 1): currentPosition[1] += 1
     elif(direction == 2): currentPosition[1] -= 1
     elif(direction == 3): currentPosition[0] += 1
@@ -37,7 +57,7 @@ def GetTargetPosition():
 
     return currentPosition
     
-walls = [[]]
+walls = []
 systemFound = False
 systemLocation = [0, 0]
 
@@ -45,16 +65,16 @@ wall = pygame.image.load("Bricks.png")
 robot = pygame.image.load("RepairRobot.png")
 def Draw():
     screen.fill(pygame.Color(0, 0, 0))
-    print(walls)
+    screen.fill(pygame.Color(0, 0, 255), pygame.Rect(offset, [spriteSpacing] * 2))
     for w in walls:
-        objRect = pygame.Rect(w[0] * spriteSpacing, w[1] * spriteSpacing, spriteSpacing, spriteSpacing)
+        objRect = pygame.Rect(w[0] * spriteSpacing + offset[0], w[1] * spriteSpacing + offset[1], spriteSpacing, spriteSpacing)
         screen.blit(wall, objRect)
 
     if(systemFound):
-        objRect = pygame.Rect(systemLocation[0] * spriteSpacing, systemLocation[1] * spriteSpacing, spriteSpacing, spriteSpacing)
+        objRect = pygame.Rect(systemLocation[0] * spriteSpacing + offset[0], systemLocation[1] * spriteSpacing + offset[1], spriteSpacing, spriteSpacing)
         screen.fill(pygame.color(0, 255, 0), objRect)
 
-    robotRect = pygame.Rect(position[0] * spriteSpacing, position[1] * spriteSpacing, spriteSpacing, spriteSpacing)
+    robotRect = pygame.Rect(position[0] * spriteSpacing + offset[0], position[1] * spriteSpacing + offset[1], spriteSpacing, spriteSpacing)
     screen.blit(robot, robotRect)
 
     pygame.display.flip()
@@ -79,3 +99,9 @@ def RecieveOutput(out):
     Draw()
 
 computer.Run(RecieveOutput, SendInput)
+
+while True:
+    for event in pygame.event.get():
+        QuitCheck(event)
+        if(event.type == pygame.KEYDOWN):
+            ScrollScreen(event)
