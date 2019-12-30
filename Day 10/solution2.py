@@ -1,4 +1,3 @@
-import numpy as np
 import math
 
 def manhattan(point):
@@ -8,9 +7,14 @@ def getAngle(point, sorting=True):
     result = 0
     result += (math.degrees(math.atan2(point[1], point[0])) + 180 - 90) % 360
     if(sorting):
-        result += manhattan(point) / 100
-
+        result += manhattan(point) / 1000
+    
     return result
+
+def truncate(N, decimals):    
+    num = N * (10 ** decimals)
+    num = math.trunc(num)
+    return num / (10 ** decimals)
 
 f = open("input.txt", "r")
 
@@ -35,30 +39,28 @@ for i in asteroids:
 asteroids_sorted.sort(key=getAngle)
 asteroids_sorted.pop(0)
 
+decimals = 1
+
 laserAngle = 0
-currentAsteroid = 0
-destructionCount = 0
-
+asteroidIndex = 0
+destruction = 0
 while True:
-    asteroid = asteroids_sorted[currentAsteroid]
-    asteroidAngle = int(getAngle(asteroid, False))
+    asteroid = asteroids_sorted[asteroidIndex % len(asteroids_sorted)]
+    asteroidAngle = truncate(getAngle(asteroid, False), decimals)
+
     if(asteroidAngle < laserAngle):
-        currentAsteroid += 1
-        currentAsteroid = currentAsteroid % len(asteroids_sorted)
-
-        if(int(getAngle(asteroids_sorted[currentAsteroid], False)) < asteroidAngle):
-            laserAngle += 1
-    elif(asteroidAngle == laserAngle):
-        destructionCount += 1
-        if(destructionCount == 200):
-            lastAsteroid = (asteroid[0] + station[0], asteroid[1] + station[1])
-            print("%s is no. 200. (%d * 100 + %d = %d)" % (lastAsteroid, lastAsteroid[0], lastAsteroid[1], lastAsteroid[0] * 100 + lastAsteroid[1]))
-            break
-        asteroids_sorted.pop(currentAsteroid)
-        laserAngle += 1
+        asteroidIndex += 1
     else:
-        laserAngle += 1
+        if(asteroidAngle == laserAngle):
+            destruction += 1
+            if(destruction == 200):
+                asteroid = (asteroid[0] + station[0], asteroid[1] + station[1])
+                print("200th asteroid at %s. X * 100 + Y = %d" % (asteroid, asteroid[0] * 100 + asteroid[1]))
+                break
+            
+            asteroids_sorted.pop(asteroidIndex)
+            
 
-    laserAngle = laserAngle % 360
-
-    print(laserAngle)
+        laserAngle += 10 ** -decimals
+        laserAngle = round(laserAngle, decimals)
+        laserAngle %= 360
