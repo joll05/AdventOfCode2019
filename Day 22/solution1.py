@@ -36,5 +36,5 @@ for i in instructions:
 resultFile = open("output.txt", "w")
 resultFile.write(str(myDeck))
 
-print("Card 2029 is at position", myDeck.index(2019))
+print("Card 2019 is at position", myDeck.index(2019))
 print("The whole deck is written at output.txt")
